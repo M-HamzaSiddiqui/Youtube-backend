@@ -5,7 +5,7 @@ class ApiResponse {
         message = "Success"
     ) {
         this.statusCode = statusCode;
-        this.data = data;
+        this.data = data;         // it contains addtional information about the error that helps in debugging
         this.message = message;
         this.success = statusCode < 400;
     }

@@ -19,3 +19,9 @@ export { asyncHandler };
 //         })
 //     }
 // }
+
+
+
+// this is standard approach to handle asynchronous operations in a backend
+
+// asyncHandler ek higherOrder function h jo ek function as a parameter accept karta h aur ek inner function return karta h. yaha par fn as parameter accept ho raha h aur ek naya async function return ho raha h aur express middleware stack use req, res aur next provide kar raha h. Basically ham ek wrapper use kar rahe h kisi async opertion ya function par jab koi router hit hoga.
