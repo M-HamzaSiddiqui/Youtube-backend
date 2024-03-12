@@ -19,5 +19,14 @@ app.use(express.static("public"))   // to store files locally on server
 app.use(cookieParser())              // to set and retrieve cookies on the users browser
 
 
+// routes import 
+
+import userRouter from "./routes/user.routes.js"
+
+// routes declaration
+
+app.use("/api/v1/users", userRouter)
+
+
 
 export { app }; 
