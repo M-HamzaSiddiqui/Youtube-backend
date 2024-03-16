@@ -1,7 +1,7 @@
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { User } from "../models/user.model.js";
-import { uploadOnCloudinary } from "../utils/cloudinary.js";
+import { uploadOnCloudinary, deleteFromCloudinary } from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import jwt from "jsonwebtoken";
 
@@ -234,11 +234,11 @@ const getCurrentUser = asyncHandler(async (req, res) => {
     return res.status(200).json(new ApiResponse(200, req.user, "current user fetched successfully"));
 });
 
-const updateAccountDetails = asyncHandler(async(req, res) => {
-    const {fullname, email, } = req.body
+const updateAccountDetails = asyncHandler(async (req, res) => {
+    const { fullname, email, } = req.body;
 
-    if(!fullname || !email){
-        throw new ApiError(400, "All fields are required")
+    if (!fullname || !email) {
+        throw new ApiError(400, "All fields are required");
     }
 
     const user = await User.findByIdAndUpdate(
@@ -249,26 +249,32 @@ const updateAccountDetails = asyncHandler(async(req, res) => {
                 email
             }
         },
-        {new: true}
-    ).select("-password")
+        { new: true }
+    ).select("-password");
 
     return res
-    .status(200)
-    .json(new ApiResponse(200, user, "Account details updated successfully"))
-})
+        .status(200)
+        .json(new ApiResponse(200, user, "Account details updated successfully"));
+});
 
-const updateUserAvatar = asyncHandler(async(req, res) => {
-    const avatarLocalPath = req.file?.path
+const updateUserAvatar = asyncHandler(async (req, res) => {
+    const avatarLocalPath = req.file?.path;
 
-    if(!avatarLocalPath){
-        throw new ApiError(400, "Avatar file is missing")
+    if (!avatarLocalPath) {
+        throw new ApiError(400, "Avatar file is missing");
     }
 
-    const newAvatar = await uploadOnCloudinary(avatarLocalPath)
+    const newAvatar = await uploadOnCloudinary(avatarLocalPath);
 
-    if(!newAvatar.url) {
-        throw new ApiError(400, "Error while uploading avatar")
+    if (!newAvatar.url) {
+        throw new ApiError(400, "Error while uploading avatar");
     }
+
+    const oldAvatar = req.user?.avatar;
+    const oldAvatarPublicId = oldAvatar.split("/").pop().split(".")[0];
+    await deleteFromCloudinary(oldAvatarPublicId);
+
+
 
     const user = await User.findByIdAndUpdate(
         req.user?._id,
@@ -280,26 +286,30 @@ const updateUserAvatar = asyncHandler(async(req, res) => {
         {
             new: true
         }
-    ).select("-password")
+    ).select("-password");
 
     return res
-    .status(200)
-    .json(new ApiResponse(200, user, "Avatar updated successfully"))
+        .status(200)
+        .json(new ApiResponse(200, user, "Avatar updated successfully"));
 
-})
+});
 
-const updateUserCoverImage = asyncHandler(async(req, res) => {
-    const coverImageLocalPath = req.file?.path
+const updateUserCoverImage = asyncHandler(async (req, res) => {
+    const coverImageLocalPath = req.file?.path;
 
-    if(!coverImageLocalPath){
-        throw new ApiError(400, "Cover Image file is missing")
+    if (!coverImageLocalPath) {
+        throw new ApiError(400, "Cover Image file is missing");
     }
 
-    const newCoverImage = await uploadOnCloudinary(coverImageLocalPath)
+    const newCoverImage = await uploadOnCloudinary(coverImageLocalPath);
 
-    if(!newCoverImage.url) {
-        throw new ApiError(400, "Error while uploading coverImage")
+    if (!newCoverImage.url) {
+        throw new ApiError(400, "Error while uploading coverImage");
     }
+
+    const oldCoverImage = req.user?.avatar;
+    const oldCoverImagePublicId = oldCoverImage.split("/").pop().split(".")[0];
+    await deleteFromCloudinary(oldCoverImagePublicId);
 
     const user = await User.findByIdAndUpdate(
         req.user?._id,
@@ -311,20 +321,20 @@ const updateUserCoverImage = asyncHandler(async(req, res) => {
         {
             new: true
         }
-    ).select("-password")
+    ).select("-password");
 
     return res
-    .status(200)
-    .json(new ApiResponse(200, user, "Cover Image updated successfully"))
+        .status(200)
+        .json(new ApiResponse(200, user, "Cover Image updated successfully"));
 
-})
+});
 
 export {
     registerUser,
     loginUser,
     logoutUser,
     refreshAccesToken,
-    changeCurrentPassword, 
+    changeCurrentPassword,
     getCurrentUser,
     updateAccountDetails,
     updateUserAvatar,
