@@ -1,7 +1,7 @@
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { User } from "../models/user.model.js";
-import { uploadOnCloudinary, deleteFromCloudinary } from "../utils/cloudinary.js";
+import { uploadOnCloudinary, deleteImageFromCloudinary } from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import jwt from "jsonwebtoken";
 
@@ -284,7 +284,7 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
 
     const oldAvatar = req.user?.avatar;
     const oldAvatarPublicId = oldAvatar.split("/").pop().split(".")[0];
-    await deleteFromCloudinary(oldAvatarPublicId);
+    await deleteImageFromCloudinary(oldAvatarPublicId);
 
     return res
         .status(200)
@@ -319,7 +319,7 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
 
     const oldCoverImage = req.user?.avatar;
     const oldCoverImagePublicId = oldCoverImage.split("/").pop().split(".")[0];
-    await deleteFromCloudinary(oldCoverImagePublicId);
+    await deleteImageFromCloudinary(oldCoverImagePublicId);
 
     return res
         .status(200)

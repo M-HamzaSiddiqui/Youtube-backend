@@ -27,19 +27,30 @@ const uploadOnCloudinary = async (localFilePath) => {
     }
 };
 
-const deleteFromCloudinary = async (publicId) => {
+const deleteImageFromCloudinary = async(publicId) => {
     try {
-
-        if (!publicId) {
-            return null;
+        if(!publicId) {
+            return null
         }
 
-        await cloudinary.uploader.destroy(publicId);
-
+        await cloudinary.uploader.destroy(publicId)
 
     } catch (error) {
-        return null;
+        return null
     }
-};
+}
 
-export { uploadOnCloudinary, deleteFromCloudinary };
+const deleteVideoFromCloudinary = async(publicId) => {
+    try {
+        if(!publicId) {
+            return null
+        }
+
+        await cloudinary.uploader.destroy(publicId, {resource_type: "video"})
+
+    } catch (error) {
+        return null
+    }
+}
+
+export { uploadOnCloudinary, deleteImageFromCloudinary, deleteVideoFromCloudinary };
