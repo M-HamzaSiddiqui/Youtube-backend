@@ -109,7 +109,14 @@ const toggleTweetLike = asyncHandler(async (req, res) => {
 const getLikedVideos = asyncHandler(async (req, res) => {
     //TODO: get all liked videos
 
-    const likedVideos = await Like.aggregate([
+    const {page = 1, limit = 10} = req.query
+
+    const options = {
+        page: parseInt(page),
+        limit: parseInt(limit)
+    }
+
+    const likedVideos = Like.aggregate([
         {
             $match: {
                 likedBy: req.user?._id,
@@ -121,25 +128,61 @@ const getLikedVideos = asyncHandler(async (req, res) => {
                 from: 'videos',
                 localField: 'video',
                 foreignField: '_id',
-                as: "videoInfo"
+                as: "videoInfo",
+                pipeline: [
+                    {
+                        $project: {
+                            title: 1,
+                            thumbnail: 1,
+                            description: 1,
+                            duration: 1,
+                            videoFile: 1,
+                            views: 1
+                        }
+                    }
+                ]
+            },
+        },
+        {
+            $lookup: {
+                from: 'users',
+                localField: 'likedBy',
+                foreignField: '_id',
+                as: 'ownerInfo',
+                pipeline: [
+                    {
+                        $project: {
+                            username: 1,
+                            avatar: 1,
+                            fullname: 1,
+                            _id: 0
+                        }
+                    }
+                ]
             }
-        },  
+        },
         {
             $project: {
                 videoInfo: { $arrayElemAt: ['$videoInfo', 0] },
-                _id: 0
+                _id: 0,
+                ownerInfo: 1,
+                ownerInfo: {
+                    $first: '$ownerInfo'
+                }
             }
         },
     ]);
 
-    if (!likedVideos?.length) {
-        throw new ApiError(404, "No video found");
+    const paginatedLikedVideos = await Like.aggregatePaginate(likedVideos, options)
+
+    if(!paginatedLikedVideos.docs?.length){
+        throw new ApiError(400, "no liked videos found || You might be giving wrong query parameters")
     }
 
     return res
         .status(200)
         .json(
-            new ApiResponse(200, likedVideos, "Liked videos retrieved successfully")
+            new ApiResponse(200, paginatedLikedVideos.docs, "Liked videos retrieved successfully")
         );
 
 });

@@ -64,6 +64,10 @@ const getVideoComments = asyncHandler(async (req, res) => {
 
     const paginatedComments = await Comment.aggregatePaginate(comments, options);
 
+    if(!paginatedComments.docs?.length) {
+        throw new ApiError(404, "no comments found || You might be giving wrong query parameters")
+    }
+
 
     return res
         .status(200)
