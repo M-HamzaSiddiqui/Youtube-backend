@@ -138,8 +138,13 @@ const getChannelVideos = asyncHandler(async (req, res) => {
 
     const videos = Video.aggregate(pipeline);
 
-    const paginatedVideos = await Video.aggregatePaginate(videos, options)
-    console.log(paginatedVideos.docs)
+    const paginatedVideos = await Video.aggregatePaginate(videos, options);
+
+    if (!paginatedVideos.docs?.length) {
+        return res
+            .status(200)
+            .json(new ApiResponse(200, null, "no video found"));
+    }
 
     return res
         .status(200)
